@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from db_setup import Base
 import uuid
+from datetime import datetime
+
 
 
 # Donor model
@@ -34,9 +36,18 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    role = Column(String, nullable=False, default="donor")  # "donor", "receiver", or other roles
+    role = Column(String, nullable=True)  # "donor", "receiver", or other roles
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
     donations = relationship("Donor", back_populates="user", foreign_keys=[Donor.user_id])
     received_donations = relationship("Donor", back_populates="receiver", foreign_keys=[Donor.receiver_id])
+
+# Logout model
+class TokenBlacklist(Base):
+    __tablename__ = 'token_blacklist'
+    __table_args__ = {'schema':'food_app'}
+
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, nullable=False, unique=True)
+    blacklisted_at = Column(DateTime, default=datetime.utcnow)
